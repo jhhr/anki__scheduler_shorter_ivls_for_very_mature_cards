@@ -1,0 +1,18 @@
+<b>Use this at your own risk.</b> If this add-on has a bug all future scheduling might be ruined. I use it for me. Hardly anyone else uses it. Maybe it's useful for you, too. Before you use it you could have a look at the source code which is only about 20 lines. 
+
+Feedback, Improvements, Error reports are welcome - open an issue in <a href="https://github.com/ijgnd/anki__scheduler_shorter_ivls_for_very_mature_cards/issues" rel="nofollow">my github repo</a>).
+
+<b># My motivation</b>
+
+I hate forgetting/rescheduling cards with very long intervals. It feels like I wasted reviews (even if I don't use a lapse interval of 0%). This add-on reduces the next interval for very mature cards which should slightly increase their retention rate. Lowering the intervals overall (with a reduced interval modifier) is not an option because this would lead to a lot of additional work, check the calculations in the manual <a href="https://apps.ankiweb.net/docs/manual.html#reviews" rel="nofollow">here</a>. Having an add-on that slighly lowers the interval for very mature cards is soothing.
+
+I'm not sure if such a reduction is really useful apart from this psychological effect: Unless you limit your Anki use to languages you have the problem that most of the knowledge you learn now won't be relevant for you in the long run: Either it will be dated or your needs have changed. So forgetting very mature cards shouldn't be a problem in many cases.
+
+Maybe the additional workload could be justified like this: If each review lasts 10 seconds and ...
+- if the next review interval will be 500 days then the "time investment needed to remember the card contents per day" is 10/500 = 0,02 seconds/day (for the next 500 days).
+- if the next review interval is 20 days then the "time investment needed to remember the card contents per day" is 10/20 = 0,5 seconds/day (for the next 20 days). 
+
+<b># Implementation</b>
+This add-on overwrites one method from the scheduler(`_nextRevIvl`).
+
+To compare the built-in scheduler with my modifications I use my add-on <a href="https://ankiweb.net/shared/info/673114053" rel="nofollow">deck and card info sidebar during review</a> and in it enable the option "try_to_show_origvmod_scheduler”. Keep in mind that after Anki calculates and shows the new intervals for easy/good/hard it applies some randomness (fuzz). So if you look into the info of the prior card you should always see a slightly different number.

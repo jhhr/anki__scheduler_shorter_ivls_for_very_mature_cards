@@ -1,0 +1,37 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "scheduler - shorter ivls for mature cards",
+    "properties": {
+        "days_lower": {
+            "type": "number",
+            "default": 250,
+            "description": ""
+        },
+        "days_upper": {
+            "type": "number",
+            "default": 360,
+            "description": ""
+        },
+        "reduce_to": {
+            "type": "number",
+            "default": 80,
+            "description": ""
+        },
+        "ease_min": {
+            "type": "number",
+            "default": 150,
+            "description": ""
+        },
+        "ease_max": {
+            "type": "number",
+            "default": 350,
+            "description": ""
+        },
+        "delay_percentage": {
+            "type": "number",
+            "default": 100,
+            "description": ""
+        }
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "days_lower": 250,
+    "days_upper": 360,
+    "delay_percentage": 100,
+    "ease_min": 150,
+    "ease_max": 350,
+    "reduce_to": 80
+}
