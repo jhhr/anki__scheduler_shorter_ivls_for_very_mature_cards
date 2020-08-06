@@ -36,7 +36,8 @@ def nextRevIvlMod__v1(self, card, ease):
     fct = card.factor / 1000.0
 
     ###start of modification###
-    delay = int(delay * gc("delay_percentage")/100.0)
+    if card.ivl >= gc("delay: don't modify delay for cards with ivls below"):
+        delay = int(delay * gc("delay: percentage")/100.0)
 
     if gc("ease_min"):
         min_fct = gc("ease_min")/100.0
@@ -81,7 +82,9 @@ def nextRevIvlMod__v2(self, card: Card, ease: int, fuzz: bool) -> int:
         hardMin = 0
 
     ###start of modification###
-    delay = int(delay * gc("delay_percentage")/100.0)
+    if card.ivl >= gc("delay: don't modify delay for cards with ivls below"):
+        delay = int(delay * gc("delay: percentage")/100.0)
+
     if gc("ease_min"):
         min_fct = gc("ease_min")/100.0
         if min_fct >= fct:
@@ -90,16 +93,14 @@ def nextRevIvlMod__v2(self, card: Card, ease: int, fuzz: bool) -> int:
         max_fct = gc("ease_max")/100.0
         if max_fct <= fct:
             fct = max_fct
-    ###end of modification###
 
-    prelim_ivl2 = self._constrainedIvl(card.ivl * hardFactor, conf, hardMin, fuzz)
-    # prelim_ivl3 = self._constrainedIvl((card.ivl + delay // 2) * fct, conf, prelim_ivl2, fuzz)
-    prelim_ivl3 = self._constrainedIvl((card.ivl + delay) * fct, conf, prelim_ivl2, fuzz)
-    prelim_ivl4 = self._constrainedIvl(
-        (card.ivl + delay) * fct * conf["ease4"], conf, prelim_ivl3, fuzz
-    )
 
-    ###start of modification###
+    f = self._constrainedIvl
+    prelim_ivl2 = f( card.ivl * hardFactor,                        conf, hardMin,     fuzz)
+    prelim_ivl3 = f((card.ivl + delay // 2) * fct,                 conf, prelim_ivl2, fuzz)
+    prelim_ivl4 = f((card.ivl + delay) *      fct * conf["ease4"], conf, prelim_ivl3, fuzz)
+
+
     ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2)
     ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3)
     ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4)

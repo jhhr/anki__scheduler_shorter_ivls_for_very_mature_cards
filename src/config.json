@@ -1,7 +1,8 @@
 {
     "days_lower": 250,
     "days_upper": 360,
-    "delay_percentage": 100,
+    "delay: don't modify delay for cards with ivls below": 200,
+    "delay: percentage": 100,
     "ease_min": 150,
     "ease_max": 350,
     "reduce_to": 80
