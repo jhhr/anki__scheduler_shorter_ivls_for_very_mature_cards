@@ -3,6 +3,7 @@
     "days_upper": 360,
     "delay: don't modify delay for cards with ivls below": 200,
     "delay: percentage": 100,
+    "don't reduce ivls if they are already capped by the deck maxIvl": true,
     "ease_min": 150,
     "ease_max": 350,
     "reduce_to": 80

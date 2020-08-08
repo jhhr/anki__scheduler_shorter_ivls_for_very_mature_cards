@@ -13,8 +13,11 @@ from anki.hooks import wrap
 from .config import gc
 
 
-def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl): 
+def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf): 
     """all inputs are integers and fractions of integers are rounded down"""
+    red = gc("don't reduce ivls if they are already capped by the deck maxIvl")
+    if red and prelim_new_ivl > conf["maxIvl"]:
+        return prelim_new_ivl
     if prelim_new_ivl - gc("days_lower") <= 0:
         return int(prelim_new_ivl)
     elif prelim_new_ivl - gc("days_upper") > 0:
@@ -54,9 +57,9 @@ def nextRevIvlMod__v1(self, card, ease):
     prelim_ivl4 = self._constrainedIvl((card.ivl + delay) * fct * conf['ease4'], conf, prelim_ivl3)
 
     ###start of modification###
-    ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2)
-    ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3)
-    ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4)
+    ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2, conf)
+    ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3, conf)
+    ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4, conf)
     ###end of modification###
 
     if ease == 2:
@@ -101,9 +104,9 @@ def nextRevIvlMod__v2(self, card: Card, ease: int, fuzz: bool) -> int:
     prelim_ivl4 = f((card.ivl + delay) *      fct * conf["ease4"], conf, prelim_ivl3, fuzz)
 
 
-    ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2)
-    ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3)
-    ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4)
+    ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2, conf)
+    ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3, conf)
+    ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4, conf)
     ###end of modification###
 
     if ease == 2:
