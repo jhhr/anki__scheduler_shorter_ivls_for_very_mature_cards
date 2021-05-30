@@ -21,9 +21,10 @@ def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult):
     # Modify factor to decrease depending on how large ivl is
     mod_fct = (1 + 1 / math.sqrt(prelim_new_ivl)) ** fct
     full_mod_ivl = mult * (prelim_new_ivl / fct) * mod_fct
-    # Higher ease = shorter change to logarithmic growth = lower review frequency
+    # Multiply days_upper by factor, this means that
+    # Higher ease = longer change to logarithmic growth = lower review frequency
     # This keeps high ease cards different from low ease even when they're very mature
-    adj_days_upper = float(gc("days_upper")) * (1 + math.log(fct, 15))
+    adj_days_upper = float(gc("days_upper")) * fct
 
     if red and prelim_new_ivl > conf["maxIvl"]:
         return prelim_new_ivl
