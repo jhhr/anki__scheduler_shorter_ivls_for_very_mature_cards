@@ -1,6 +1,7 @@
 # License AGPLv3
 
 import sys
+import math
 
 from anki.cards import Card
 from anki.sched import Scheduler as oldsched
@@ -13,28 +14,32 @@ from anki.hooks import wrap
 from .config import gc
 
 
-def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf): 
+def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult):
     """all inputs are integers and fractions of integers are rounded down"""
     red = gc("don't reduce ivls if they are already capped by the deck maxIvl")
+
+    # Modify factor to decrease depending on how large ivl is
+    mod_fct = (1 + 1 / math.sqrt(prelim_new_ivl)) ** fct
+    full_mod_ivl = mult * (prelim_new_ivl / fct) * mod_fct
+    # Higher ease = shorter change to logarithmic growth = lower review frequency
+    # This keeps high ease cards different from low ease even when they're very mature
+    adj_days_upper = float(gc("days_upper")) * (1 + math.log(fct, 15))
+
     if red and prelim_new_ivl > conf["maxIvl"]:
         return prelim_new_ivl
     if prelim_new_ivl - gc("days_lower") <= 0:
         return int(prelim_new_ivl)
-    elif prelim_new_ivl - gc("days_upper") > 0:
+    elif prelim_new_ivl - adj_days_upper > 0:
+        return int(full_mod_ivl)
+    else:
+        days_range = float(adj_days_upper - gc("days_lower"))
         days_over_lower = prelim_new_ivl - gc("days_lower")
-        out = int(gc("days_lower") + (days_over_lower * (gc("reduce_to")/100.0)))
-        return out
-    else:  # gc("days_lower") < prelim_new_ivl <= gc("days_upper")
-        days_range = float(gc("days_upper") - gc("days_lower"))
-        days_over_lower = prelim_new_ivl - gc("days_lower")
-        p = days_over_lower/days_range
-        ivl_mod_range = 1.0 - gc("reduce_to")/100.0
-        reduce_to_range = 1 - (p * ivl_mod_range)
-        out = int( gc("days_lower") + (reduce_to_range * days_over_lower))
-        return out
+        p = days_over_lower / days_range
+        # Return gradually increasing portion of fully modded vs normal ivl
+        return int(min(prelim_new_ivl, prelim_new_ivl * (1 - p) + full_mod_ivl * p))
 
 
-#this is a modified version of _nextRevIvl from sched.py
+# this is a modified version of _nextRevIvl from sched.py
 def nextRevIvlMod__v1(self, card, ease):
     "Ideal next interval for CARD, given EASE."
     delay = self._daysLate(card)
@@ -55,14 +60,20 @@ def nextRevIvlMod__v1(self, card, ease):
             fct = max_fct
     ###end of modification###
 
-    prelim_ivl2 = self._constrainedIvl((card.ivl + delay // 4) * 1.2, conf, card.ivl)
-    prelim_ivl3 = self._constrainedIvl((card.ivl + delay // 2) * fct, conf, prelim_ivl2)
-    prelim_ivl4 = self._constrainedIvl((card.ivl + delay) * fct * conf['ease4'], conf, prelim_ivl3)
+    prelim_ivl2 = self._constrainedIvl(
+        (card.ivl + delay // 4) * 1.2, conf, card.ivl)
+    prelim_ivl3 = self._constrainedIvl(
+        (card.ivl + delay // 2) * fct, conf, prelim_ivl2)
+    prelim_ivl4 = self._constrainedIvl(
+        (card.ivl + delay) * fct * conf['ease4'], conf, prelim_ivl3)
 
     ###start of modification###
-    ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2, conf)
-    ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3, conf)
-    ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4, conf)
+    ivl2 = _modify_ivl_for_very_mature_cards(
+        self, prelim_ivl2, conf, fct, 1)
+    ivl3 = _modify_ivl_for_very_mature_cards(
+        self, prelim_ivl3, conf, fct, 1)
+    ivl4 = _modify_ivl_for_very_mature_cards(
+        self, prelim_ivl4, conf, fct, conf['ease4'])
     ###end of modification###
 
     if ease == 2:
@@ -71,7 +82,7 @@ def nextRevIvlMod__v1(self, card, ease):
         interval = ivl3
     elif ease == 4:
         interval = ivl4
-    #interval capped?
+    # interval capped?
     return min(interval, conf['maxIvl'])
 
 
@@ -81,7 +92,7 @@ def nextRevIvlMod__v2(self, card: Card, ease: int, fuzz: bool) -> int:
     conf = self._revConf(card)
     fct = card.factor / 1000
     hardFactor = conf.get("hardFactor", 1.2)
-    
+
     if hardFactor > 1:
         hardMin = card.ivl
     else:
@@ -102,14 +113,19 @@ def nextRevIvlMod__v2(self, card: Card, ease: int, fuzz: bool) -> int:
 
 
     f = self._constrainedIvl
-    prelim_ivl2 = f( card.ivl * hardFactor,                        conf, hardMin,     fuzz)
-    prelim_ivl3 = f((card.ivl + delay // 2) * fct,                 conf, prelim_ivl2, fuzz)
-    prelim_ivl4 = f((card.ivl + delay) *      fct * conf["ease4"], conf, prelim_ivl3, fuzz)
+    prelim_ivl2 = f(card.ivl * hardFactor,
+                    conf, hardMin,     fuzz)
+    prelim_ivl3 = f((card.ivl + delay // 2) * fct,
+                    conf, prelim_ivl2, fuzz)
+    prelim_ivl4 = f((card.ivl + delay) * fct *
+                    conf["ease4"], conf, prelim_ivl3, fuzz)
 
-
-    ivl2 = _modify_ivl_for_very_mature_cards(self, prelim_ivl2, conf)
-    ivl3 = _modify_ivl_for_very_mature_cards(self, prelim_ivl3, conf)
-    ivl4 = _modify_ivl_for_very_mature_cards(self, prelim_ivl4, conf)
+    ivl2 = _modify_ivl_for_very_mature_cards(
+        self, prelim_ivl2, conf, fct, 1)
+    ivl3 = _modify_ivl_for_very_mature_cards(
+        self, prelim_ivl3, conf, fct, 1)
+    ivl4 = _modify_ivl_for_very_mature_cards(
+        self, prelim_ivl4, conf, fct, conf['ease4'])
     ###end of modification###
 
     if ease == 2:
