@@ -4,8 +4,8 @@ import sys
 import math
 
 from anki.cards import Card
-from anki.sched import Scheduler as oldsched
-from anki.schedv2 import Scheduler as v2sched
+from anki.schedulder.v1 import Scheduler as oldsched
+from anki.scheduler.v2 import Scheduler as v2sched
 
 from aqt import mw
 from aqt.utils import showInfo
@@ -18,9 +18,10 @@ def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult):
     """all inputs are integers and fractions of integers are rounded down"""
     red = gc("don't reduce ivls if they are already capped by the deck maxIvl")
 
+    min_mod_fct = math.sqrt(fct)
+
     # Modify factor to decrease depending on how large ivl is
-    mod_fct = (1 + 1 / math.sqrt(prelim_new_ivl)) ** fct
-    full_mod_ivl = mult * (prelim_new_ivl / fct) * mod_fct
+    full_mod_ivl = mult * (prelim_new_ivl / fct) * min_mod_fct
     # Multiply days_upper by factor, this means that
     # Higher ease = longer change to logarithmic growth = lower review frequency
     # This keeps high ease cards different from low ease even when they're very mature
@@ -37,7 +38,9 @@ def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult):
         days_over_lower = prelim_new_ivl - gc("days_lower")
         p = days_over_lower / days_range
         # Return gradually increasing portion of fully modded vs normal ivl
-        return int(min(prelim_new_ivl, prelim_new_ivl * (1 - p) + full_mod_ivl * p))
+        mod_ivl = int(min(prelim_new_ivl, prelim_new_ivl * (1 - p) + full_mod_ivl * p))
+        print('mod_ivl', prelim_new_ivl, mod_ivl)
+        return mod_ivl
 
 
 # this is a modified version of _nextRevIvl from sched.py
