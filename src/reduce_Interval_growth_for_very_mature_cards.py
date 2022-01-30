@@ -4,7 +4,7 @@ import sys
 import math
 
 from anki.cards import Card
-from anki.schedulder.v1 import Scheduler as oldsched
+from anki.scheduler.v1 import Scheduler as oldsched
 from anki.scheduler.v2 import Scheduler as v2sched
 
 from aqt import mw
