@@ -6,5 +6,7 @@
     "don't reduce ivls if they are already capped by the deck maxIvl": true,
     "ease_min": 150,
     "ease_max": 350,
-    "reduce_to": 80
+    "reduce_to": 80,
+    "rep_count_limit": 50,
+    "debug": true
 }
