@@ -1,0 +1,1 @@
+{"config": {"days_lower": 1, "days_upper": 360, "debug": true, "delay: don't modify delay for cards with ivls below": 200, "delay: percentage": 100, "don't reduce ivls if they are already capped by the deck maxIvl": true, "ease_max": 500, "ease_min": 130, "reduce_to": 80, "rep_count_limit": 50}}

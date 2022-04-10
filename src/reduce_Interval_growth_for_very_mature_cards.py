@@ -30,14 +30,14 @@ def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult, rep
     # The more reviews a card has, the lower days_upper should be
     rep_count_limit = gc("rep_count_limit")
     if gc("debug"):
-        print('min_mod_fct', min_mod_fct)
-        print('rep_count / limit', f"{rep_count} / {rep_count_limit}")
-        print('days_upper adj 1', adj_days_upper)
-        print('rep_count', rep_count)
+        print(f"min_mod_fct: {min_mod_fct}")
+        print(f"rep_count / limit: {rep_count} / {rep_count_limit}")
+        print(f"adj_days_upper: {adj_days_upper}")
+        print(f"rep_count: {rep_count}")
     if rep_count_limit > 0:
         adj_days_upper = max(gc("days_lower"), adj_days_upper * (1 - rep_count / rep_count_limit))
         if gc("debug"):
-            print('days_upper adj 2', adj_days_upper)
+            print(f"adj_days_upper: {adj_days_upper}")
 
     if red and prelim_new_ivl > conf["maxIvl"]:
         return prelim_new_ivl
@@ -52,7 +52,7 @@ def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult, rep
         # Return gradually increasing portion of fully modded vs normal ivl
         mod_ivl = int(min(prelim_new_ivl, prelim_new_ivl * (1 - p) + full_mod_ivl * p))
         if gc("debug"):
-            print('mod_ivl', prelim_new_ivl, mod_ivl)
+            print(f"prelim - mod ivl: {prelim_new_ivl} - {mod_ivl}")
         return mod_ivl
 
 
