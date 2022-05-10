@@ -40,7 +40,7 @@ def _modify_ivl_for_very_mature_cards(self, prelim_new_ivl, conf, fct, mult, rep
             print(f"adj_days_upper: {adj_days_upper}")
 
     if prelim_new_ivl <= 3:
-        return prelim_new_ivl
+        return int(prelim_new_ivl)
     if red and prelim_new_ivl > conf["maxIvl"]:
         return conf["maxIvl"]
     if prelim_new_ivl - gc("days_lower") <= 0:
